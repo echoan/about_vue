@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="./lib/vue-2.4.0.js"></script>
+  <link rel="stylesheet" href="./lib/bootstrap-3.3.7.css">
+  <!-- 需要用到Jquery吗？？？ -->
+</head>
+
+<body>
+  <div id="app">
+
+
+
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">添加品牌</h3>
+      </div>
+      <div class="panel-body form-inline">
+        <label>
+          Id:
+          <input type="text" class="form-control" v-model="id">
+        </label>
+
+        <label>
+          Name:
+          <input type="text" class="form-control" v-model="name" @keyup.enter='add()'>
+        </label>
+
+        <!-- 在Vue中，使用事件绑定机制，为元素指定处理函数的时候，如果加了小括号，就可以给函数传参了 -->
+        <input type="button" value="添加" class="btn btn-primary" @click="add()">
+
+        <label>
+          搜索名称关键字：
+          <input type="text" class="form-control" v-model="keywords" v-focus>
+        </label>
+      </div>
+    </div>
+
+
+
+    <table class="table table-bordered table-hover table-striped">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Name</th>
+          <th>Ctime</th>
+          <th>Operation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in search(keywords)" :key="item.id">
+          <td>{{ item.id }}</td>
+          <td v-text="item.name" v-color="'red'"></td>
+          <td>{{ item.ctime | dateFormat()}}</td>
+          <td>
+            <a href="" @click.prevent="del(item.id)">删除</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+
+
+  </div>
+
+  <script>
+    //定义一个全局的过滤器 来规范化时间的显示
+    Vue.filter('dateFormat',function(dateStr,pattern=""){
+        var dt = dateStr;
+        var y = dt.getFullYear()+1;
+        var m = dt.getMonth();
+        var d = dt.getDate();
+        var h = dt.getHours().toString().padStart(2,'0');
+        var min = dt.getMinutes().toString().padStart(2,'0');
+        var s = dt.getSeconds().toString().padStart(2,'0');
+
+        if(pattern.toLowerCase()=='yy-mm-dd'){
+            return `${y}-${m}-${d}`
+        }else{
+           return `${y}-${m}-${d}-${h}:${min}:${s}` 
+        }
+    })
+
+    //在全局定义一个自定义指令
+    Vue.directive('focus',{
+        bind:function(el){},
+        inserted:function(el){
+            el.focus()
+        },
+        updated:function(el){},
+    })
+
+    //自定义全局按键修饰符
+    Vue.config.keyCodes.f2=113;
+
+
+    //自定义一个 设置字体颜色的 指令
+    Vue.directive('color',{
+        bind:function(el,blinding){
+            console.log(blinding)
+            el.style.color = blinding.value
+        }
+    })
+    // 创建 Vue 实例，得到 ViewModel
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        id: '',
+        name: '',
+        keywords:'',
+        list: [
+          { id: 1, name: '奔驰', ctime: new Date() },
+          { id: 2, name: '宝马', ctime: new Date() }
+        ]
+      },
+      methods: {
+          add(){
+              const objone = {id:this.id,name:this.name,ctime:new Date()};
+              this.list.push(objone);
+              this.id = this.name = '';
+          },
+          del(id){
+              //forEach
+            //   this.list.forEach((item,i)=>{
+            //       if(item.id==id){
+            //           this.list.splice(i,1)
+            //       }
+            //   })
+
+            //数组的some用法
+            // this.list.some((item,i)=>{
+            //     if(item.id == id){
+            //         this.list.splice(i,1)
+            //         return true
+            //     }
+            // })
+
+            //findIndex的用法
+
+            var index = this.list.findIndex((item)=>{
+                if(item.id == id){
+                    return true;
+                }
+            })
+            this.list.splice(index,1)
+          },
+
+          //搜索
+          search(keywords){
+              //方式一
+            //   const newlist = [];
+            //   this.list.forEach((item)=>{
+            //       if(item.name.indexOf(keywords)!='-1'){
+            //           newlist.push(item);
+            //       }
+            //   })
+            //   return newlist
+
+
+            //方式二
+            return this.list.filter((item)=>{
+                if(item.name.includes(keywords)){
+                    return item;
+                }
+            })
+          }
+      }
+    });
+  </script>
+</body>
+
+</html>

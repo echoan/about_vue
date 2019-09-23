@@ -1,5 +1,5 @@
 # about_vue
-vue深入细致的再学习记录
+vue深入细致的再学习记录</br>
 lesson 01
 vue的基本指令的理解
 lesson02
